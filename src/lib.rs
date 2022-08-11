@@ -30,7 +30,10 @@ pub const B8_Y: Fr = Fr::from_raw([
     0x25797203F7A0B249,
 ]);
 
-// pub const B8: Point = Point {}
+pub const B8: Point = Point {
+	x: B8_X,
+	y: B8_Y,
+};
 
 #[derive(Clone, Debug)]
 pub struct PointProjective {

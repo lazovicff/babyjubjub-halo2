@@ -1,7 +1,7 @@
 [package]
-name = "babyjubjub-rs"
+name = "babyjubjub-halo2"
 version = "0.0.8"
-authors = ["arnaucube <root@arnaucube.com>"]
+authors = ["arnaucube <root@arnaucube.com>", "filip <lazovicff@gmail.com>"]
 edition = "2018"
 license = "GPL-3.0"
 description = "BabyJubJub elliptic curve implementation"
