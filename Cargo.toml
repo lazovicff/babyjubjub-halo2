@@ -10,7 +10,6 @@ readme = "README.md"
 
 [dependencies]
 halo2curves = { git = 'https://github.com/privacy-scaling-explorations/halo2curves', tag = 'v0.2.0' }
-ff = { package="ff_ce", version="0.11", features = ["derive"] }
 rand = "0.4"
 num-bigint = {version = "0.2.2", features = ["rand"]}
 lazy_static = "1.4.0"
