@@ -4,9 +4,6 @@
 use halo2curves::bn256::Fr;
 use halo2curves::group::ff::Field;
 use num_bigint::BigUint;
-use std::ops::AddAssign;
-use std::ops::MulAssign;
-use std::ops::SubAssign;
 
 // D = 168696
 pub const D: Fr = Fr::from_raw([0x292F8, 0x00, 0x00, 0x00]);
@@ -30,10 +27,7 @@ pub const B8_Y: Fr = Fr::from_raw([
     0x25797203F7A0B249,
 ]);
 
-pub const B8: Point = Point {
-	x: B8_X,
-	y: B8_Y,
-};
+pub const B8: Point = Point { x: B8_X, y: B8_Y };
 
 #[derive(Clone, Debug)]
 pub struct PointProjective {
@@ -52,10 +46,8 @@ impl PointProjective {
         }
 
         let zinv = self.z.invert().unwrap();
-        let mut x = self.x;
-        x.mul_assign(&zinv);
-        let mut y = self.y;
-        y.mul_assign(&zinv);
+        let x = self.x.mul(&zinv);
+        let y = self.y.mul(&zinv);
 
         Point { x, y }
     }
@@ -63,41 +55,29 @@ impl PointProjective {
     #[allow(clippy::many_single_char_names)]
     pub fn add(&self, q: &PointProjective) -> PointProjective {
         // add-2008-bbjlp https://hyperelliptic.org/EFD/g1p/auto-twisted-projective.html#doubling-dbl-2008-bbjlp
-        let mut a = self.z;
-        a.mul_assign(&q.z);
-        let mut b = a;
-        b = b.square();
-        let mut c = self.x;
-        c.mul_assign(&q.x);
-        let mut d = self.y;
-        d.mul_assign(&q.y);
-        let mut e = D.clone();
-        e.mul_assign(&c);
-        e.mul_assign(&d);
-        let mut f = b;
-        f.sub_assign(&e);
-        let mut g = b;
-        g.add_assign(&e);
-        let mut x1y1 = self.x;
-        x1y1.add_assign(&self.y);
-        let mut x2y2 = q.x;
-        x2y2.add_assign(&q.y);
-        let mut aux = x1y1;
-        aux.mul_assign(&x2y2);
-        aux.sub_assign(&c);
-        aux.sub_assign(&d);
-        let mut x3 = a;
-        x3.mul_assign(&f);
-        x3.mul_assign(&aux);
-        let mut ac = A.clone();
-        ac.mul_assign(&c);
-        let mut dac = d;
-        dac.sub_assign(&ac);
-        let mut y3 = a;
-        y3.mul_assign(&g);
-        y3.mul_assign(&dac);
-        let mut z3 = f;
-        z3.mul_assign(&g);
+
+        // A = Z1*Z2
+        let a = self.z.mul(&q.z);
+        // B = A2
+        let b = a.square();
+        // C = X1*X2
+        let c = self.x.mul(&q.x);
+        // D = Y1*Y2
+        let d = self.y.mul(&q.y);
+        // E = d*C*D
+        let e = D.mul(&c).mul(&d);
+        // F = B-E
+        let f = b.sub(&e);
+        // G = B+E
+        let g = b.add(&e);
+        // X3 = A*F*((X1+Y1)*(X2+Y2)-C-D)
+        let x3 = a
+            .mul(&f)
+            .mul(&self.x.add(&self.y).mul(&q.x.add(&q.y)).sub(&c).sub(&d));
+        // Y3 = A*G*(D-a*C)
+        let y3 = a.mul(&g).mul(&d.sub(&A.mul(&c)));
+        // Z3 = F*G
+        let z3 = f.mul(&g);
 
         PointProjective {
             x: x3,
